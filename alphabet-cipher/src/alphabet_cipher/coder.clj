@@ -16,10 +16,9 @@
         reverse
         flatten)))
 
-(defn generate-chart []
-  (let [start \a
-        length 26
-        alphabet (generate-alphabet start length)]
+(defn generate-chart
+  [alphabet]
+  (let [length (count alphabet)]
     (loop [alphabet alphabet
            step 0
            acc (reduce str (transpose alphabet 0))]
@@ -31,11 +30,30 @@
                  (str acc row))
           acc)))))
 
-(defn pick-letter
-  [chart row col]
-  )
+(defn indexes-of
+  [e coll]
+  (keep-indexed #(when (= e %2) %1) coll))
 
-(pick-letter (generate-chart) "s" "m")
+(defn index-of
+  [e coll]
+  (first (indexes-of e coll)))
+
+(defn pick-letter
+  [chart alphabet row-code col-code]
+  (let [len (count alphabet)
+        col (index-of col-code alphabet)
+        row (index-of row-code alphabet)
+        position (+ (* row len) col)]
+    (subs chart position (inc position))))
+
+(comment
+ (let [start \a
+       length 26
+       alphabet (generate-alphabet start length)
+       chart (generate-chart alphabet)]
+   (pick-letter chart alphabet "s" "m")
+   (pick-letter chart alphabet "z" "b"))
+ )
 
 
 (defn encode
