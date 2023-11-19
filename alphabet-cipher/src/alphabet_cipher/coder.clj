@@ -53,18 +53,36 @@
         position (+ (* row len) col)]
     (subs chart position (inc position))))
 
+(defn kwrd
+  [keyword times]
+  (->> keyword
+       cycle
+       (take times)))
+
 (defn encode
   [keyword message]
   (let [alphabet (generate-alphabet \a 26)
         chart (generate-chart alphabet)
-        keywords (take (count message) (cycle keyword))]
+        keywords (kwrd keyword (count message))]
     (reduce str (map
-                 (fn [[row col]] (pick-letter chart alphabet (str row) (str col)))
+                 (fn [[row-code col-code]]
+                   (pick-letter chart alphabet (str row-code) (str col-code)))
                  (partition 2 (interleave keywords (seq message)))))))
 
 (defn decode
   [keyword message]
-  "decodeme")
+  (let [len 26
+        alphabet (generate-alphabet \a len)
+        chart (generate-chart alphabet)
+        keywords (kwrd keyword (count message))]
+    (reduce str (map
+                 (fn [[row-code item]]
+                   (let [idx (index-of (str row-code) alphabet)
+                         position (* idx len)
+                         row (subs chart position (+ position len))
+                         i (index-of item row)]
+                     (nth alphabet i)))
+                 (partition 2 (interleave keywords (seq message)))))))
 
 (defn decipher
   [cipher message]
