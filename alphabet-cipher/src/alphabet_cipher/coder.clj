@@ -46,19 +46,14 @@
         position (+ (* row len) col)]
     (subs chart position (inc position))))
 
-(comment
- (let [start \a
-       length 26
-       alphabet (generate-alphabet start length)
-       chart (generate-chart alphabet)]
-   (pick-letter chart alphabet "s" "m")
-   (pick-letter chart alphabet "z" "b"))
- )
-
-
 (defn encode
   [keyword message]
-  "encodeme")
+  (let [alphabet (generate-alphabet \a 26)
+        chart (generate-chart alphabet)
+        keywords (take (count message) (cycle keyword))]
+    (reduce str (map
+                 (fn [[row col]] (pick-letter chart alphabet (str row) (str col)))
+                 (partition 2 (interleave keywords (seq message)))))))
 
 (defn decode
   [keyword message]
