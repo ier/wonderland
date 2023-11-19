@@ -5,9 +5,8 @@
    (generate-alphabet \a 26))
   ([start len]
    (for [x (range 0 len)]
-     (->> start
-          int
-          (+ x)
+     (->> x
+          (+ (int start))
           char
           str))))
 
@@ -69,19 +68,23 @@
                    (pick-letter chart alphabet (str row-code) (str col-code)))
                  (partition 2 (interleave keywords (seq message)))))))
 
+(defn pick-col-name
+  [chart alphabet row-code item]
+  (let [len (count alphabet)
+        position (* (index-of row-code alphabet) len)]
+    (->> (+ position len)
+         (subs chart position)
+         (index-of item)
+         (nth alphabet))))
+
 (defn decode
   [keyword message]
-  (let [len 26
-        alphabet (generate-alphabet \a len)
+  (let [alphabet (generate-alphabet \a 26)
         chart (generate-chart alphabet)
         keywords (kwrd keyword (count message))]
     (reduce str (map
                  (fn [[row-code item]]
-                   (let [idx (index-of (str row-code) alphabet)
-                         position (* idx len)
-                         row (subs chart position (+ position len))
-                         i (index-of item row)]
-                     (nth alphabet i)))
+                   (pick-col-name chart alphabet (str row-code) item))
                  (partition 2 (interleave keywords (seq message)))))))
 
 (defn decipher
