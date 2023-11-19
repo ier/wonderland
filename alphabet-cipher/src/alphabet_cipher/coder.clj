@@ -5,7 +5,11 @@
    (generate-alphabet \a 26))
   ([start len]
    (for [x (range 0 len)]
-     (str (char (+ (int start) x))))))
+     (->> start
+          int
+          (+ x)
+          char
+          str))))
 
 (defn transpose
   ([xs]
@@ -22,12 +26,13 @@
     (loop [alphabet alphabet
            step 0
            acc (reduce str (transpose alphabet 0))]
-      (let [transposed (transpose alphabet)
-            row (reduce str transposed)]
+      (let [transposed (transpose alphabet)]
         (if (< step (dec length))
           (recur transposed
                  (inc step)
-                 (str acc row))
+                 (->> transposed
+                      (reduce str)
+                      (str acc)))
           acc)))))
 
 (defn indexes-of
@@ -36,7 +41,9 @@
 
 (defn index-of
   [e coll]
-  (first (indexes-of e coll)))
+  (->> coll
+       (indexes-of e)
+       first))
 
 (defn pick-letter
   [chart alphabet row-code col-code]
