@@ -111,11 +111,10 @@
                               (fn [[row-code item]]
                                 (pick-col-name chart alphabet item row-code))
                               pairs))]
-    #_(loop [cntr 2
-           acc ""]
-      (if (> (_ keywords acc) 1)
-        acc
-        (recur nil "")))
-    ))
-
-(decipher "hcqxqqtqljmlzhwiivgbsapaiwcenmyu" "packmyboxwithfivedozenliquorjugs")
+    (loop [cntr 1]
+      (let [strings (->> (partition cntr keywords)
+                     (map #(reduce str %))
+                     distinct)]
+        (if (= 1 (count strings))
+          (first strings)
+          (recur (inc cntr)))))))
