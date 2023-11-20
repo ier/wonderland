@@ -1,6 +1,6 @@
 (ns alphabet-cipher.coder)
 
-(defn generate-alphabet
+(defn- generate-alphabet
   ([]
    (generate-alphabet \a 26))
   ([start len]
@@ -10,7 +10,7 @@
           char
           str))))
 
-(defn transpose
+(defn- transpose
   ([xs]
    (transpose xs 1))
   ([xs position]
@@ -19,7 +19,7 @@
         reverse
         flatten)))
 
-(defn generate-chart
+(defn- generate-chart
   [alphabet]
   (let [length (count alphabet)]
     (loop [alphabet alphabet
@@ -34,60 +34,88 @@
                       (str acc)))
           acc)))))
 
-(defn indexes-of
+(defn- indexes-of
   [e coll]
   (keep-indexed #(when (= e %2) %1) coll))
 
-(defn index-of
+(defn- index-of
   [e coll]
   (->> coll
        (indexes-of e)
        first))
 
-(defn pick-letter
+
+(defn- pick-letter
   [chart alphabet row-code col-code]
-  (let [len (count alphabet)
-        col (index-of col-code alphabet)
-        row (index-of row-code alphabet)
-        position (+ (* row len) col)]
+  (let [index (fn [code] (-> code
+                             str
+                             (index-of alphabet)))
+        col (index col-code)
+        row (index row-code)
+        position (->> alphabet
+                      count
+                      (* row)
+                      (+ col))]
     (subs chart position (inc position))))
 
-(defn kwrd
-  [keyword times]
-  (->> keyword
-       cycle
-       (take times)))
-
-(defn encode
-  [keyword message]
-  (let [alphabet (generate-alphabet \a 26)
-        chart (generate-chart alphabet)
-        keywords (kwrd keyword (count message))]
-    (reduce str (map
-                 (fn [[row-code col-code]]
-                   (pick-letter chart alphabet (str row-code) (str col-code)))
-                 (partition 2 (interleave keywords (seq message)))))))
-
-(defn pick-col-name
+(defn- pick-col-name
   [chart alphabet row-code item]
   (let [len (count alphabet)
-        position (* (index-of row-code alphabet) len)]
+        position (-> row-code
+                     str
+                     (index-of alphabet)
+                     (* len))]
     (->> (+ position len)
          (subs chart position)
          (index-of item)
          (nth alphabet))))
 
+(defn- kwrd
+  [keyword times]
+  (->> keyword
+       cycle
+       (take times)))
+
+#_(defn- rdsr
+  []
+  nil)
+
+(defn encode
+  [keyword message]
+  (let [alphabet (generate-alphabet \a 26)
+        chart (generate-chart alphabet)
+        keywords (kwrd keyword (count message))
+        pairs (partition 2 (interleave keywords (seq message)))]
+    (reduce str (map
+                 (fn [[row-code col-code]]
+                   (pick-letter chart alphabet row-code col-code))
+                 pairs))))
+
 (defn decode
   [keyword message]
   (let [alphabet (generate-alphabet \a 26)
         chart (generate-chart alphabet)
-        keywords (kwrd keyword (count message))]
+        keywords (kwrd keyword (count message))
+        pairs (partition 2 (interleave keywords (seq message)))]
     (reduce str (map
                  (fn [[row-code item]]
-                   (pick-col-name chart alphabet (str row-code) item))
-                 (partition 2 (interleave keywords (seq message)))))))
+                   (pick-col-name chart alphabet row-code item))
+                 pairs))))
 
 (defn decipher
   [cipher message]
-  "decypherme")
+  (let [alphabet (generate-alphabet \a 26)
+        chart (generate-chart alphabet)
+        pairs (partition 2 (interleave cipher message))
+        keywords (reduce str (map
+                              (fn [[row-code item]]
+                                (pick-col-name chart alphabet item row-code))
+                              pairs))]
+    #_(loop [cntr 2
+           acc ""]
+      (if (> (_ keywords acc) 1)
+        acc
+        (recur nil "")))
+    ))
 
+(decipher "hcqxqqtqljmlzhwiivgbsapaiwcenmyu" "packmyboxwithfivedozenliquorjugs")
