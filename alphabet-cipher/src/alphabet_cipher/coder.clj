@@ -46,11 +46,9 @@
 
 (defn- pick-letter
   [chart alphabet row-code col-code]
-  (let [index (fn [code] (-> code
-                             str
-                             (index-of alphabet)))
-        col (index col-code)
-        row (index row-code)
+  (let [idx (fn [code] (-> code str (index-of alphabet)))
+        col (idx col-code)
+        row (idx row-code)
         position (->> alphabet
                       count
                       (* row)
@@ -74,10 +72,6 @@
   (->> keyword
        cycle
        (take times)))
-
-#_(defn- rdsr
-  []
-  nil)
 
 (defn encode
   [keyword message]
