@@ -44,7 +44,6 @@
        (indexes-of e)
        first))
 
-
 (defn- pick-letter
   [chart alphabet row-code col-code]
   (let [index (fn [code] (-> code
@@ -113,8 +112,8 @@
                               pairs))]
     (loop [cntr 1]
       (let [strings (->> (partition cntr keywords)
-                     (map #(reduce str %))
-                     distinct)]
+                         (map #(reduce str %))
+                         distinct)]
         (if (= 1 (count strings))
           (first strings)
           (recur (inc cntr)))))))
