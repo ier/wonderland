@@ -59,8 +59,8 @@
                           generate-chart)})
 
 (defn- fnx
-  [f-name xs]
-  (reduce str (map (fn [[y x]] (f-name chart y x)) xs)))
+  [func xs]
+  (reduce str (map (fn [[y x]] (func chart y x)) xs)))
 
 (defn encode
   [keyword message]
