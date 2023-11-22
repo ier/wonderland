@@ -23,8 +23,7 @@
         (if (< step (dec length))
           (recur transposed
                  (inc step)
-                 (->> (reduce str transposed)
-                      (str acc)))
+                 (str acc (reduce str transposed)))
           acc)))))
 
 (defn- index-of
@@ -33,8 +32,7 @@
 
 (defn- pick-letter
   [chart row-code col-code]
-  (let [len (:alphabet-length chart)
-        alphabet (subs (:content chart) 0 len)
+  (let [alphabet (subs (:content chart) 0 (:alphabet-length chart))
         position (->> (count alphabet)
                       (* (index-of row-code alphabet))
                       (+ (index-of col-code alphabet)))]
@@ -52,9 +50,7 @@
 
 (defn- kwrd
   [keyword times]
-  (->> keyword
-       cycle
-       (take times)))
+  (->> keyword cycle (take times)))
 
 (def aplhabet-length 26)
 (def chart {:alphabet-length aplhabet-length
@@ -62,33 +58,28 @@
                           (generate-alphabet \a)
                           generate-chart)})
 
+(defn- fnx
+  [f-name xs]
+  (reduce str (map (fn [[y x]] (f-name chart y x)) xs)))
+
 (defn encode
   [keyword message]
   (let [keywords (kwrd keyword (count message))
         pairs (partition 2 (interleave keywords message))]
-    (reduce str (map
-                 (fn [[row-code col-code]]
-                   (pick-letter chart row-code col-code))
-                 pairs))))
+    (fnx pick-letter pairs)))
 
 (defn decode
   [keyword message]
   (let [keywords (kwrd keyword (count message))
         pairs (partition 2 (interleave keywords message))]
-    (reduce str (map
-                 (fn [[row-code item]]
-                   (pick-col-name chart row-code item))
-                 pairs))))
+    (fnx pick-col-name pairs)))
 
 (defn decipher
   [cipher message]
-  (let [pairs (partition 2 (interleave cipher message))
-        keywords (reduce str (map
-                              (fn [[row-code item]]
-                                (pick-col-name chart item row-code))
-                              pairs))]
+  (let [pairs (partition 2 (interleave message cipher))]
     (loop [cntr 1]
-      (let [strings (->> (partition cntr keywords)
+      (let [strings (->> (fnx pick-col-name pairs)
+                         (partition cntr)
                          (map #(reduce str %))
                          distinct)]
         (if (= 1 (count strings))
