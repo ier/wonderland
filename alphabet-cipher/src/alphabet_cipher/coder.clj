@@ -49,8 +49,8 @@
          (nth alphabet))))
 
 (defn- kwrd
-  [keyword times]
-  (->> keyword cycle (take times)))
+  [keyword lenght]
+  (->> keyword cycle (take lenght)))
 
 (def aplhabet-length 26)
 (def chart {:alphabet-length aplhabet-length
